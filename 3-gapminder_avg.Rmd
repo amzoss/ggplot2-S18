@@ -1,0 +1,41 @@
+---
+title: "Gapminder Average"
+author: "Angela Zoss"
+date: "9/25/2017"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+## Setup your environment
+
+```{r}
+
+# Load required libraries
+
+library(tidyverse)
+
+```
+
+## Load your data
+
+```{r}
+
+# data comes from http://www.gapminder.org/
+
+gap <- read_csv("data/gapminder_avg.csv")
+names(gap) <- make.names(names(gap), unique=TRUE)
+
+```
+
+## Try to reproduce this graphic
+
+![](images/gapminder-goal.png)
+
+```{r}
+
+
+
+```
