@@ -1,13 +1,9 @@
 ---
 title: "Time to Statham Punch"
 author: "Angela Zoss"
-date: "9/25/2017"
+date: "2/1/2018"
 output: github_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(error = TRUE)
-```
 
 ## Setup your environment
 
@@ -25,7 +21,7 @@ library(tidyverse)
 
 # data comes from http://time.to.stathampun.ch/
 
-punch <- read_csv("data/time_to_statham_punch.csv")
+punch <- read_csv("../data/time_to_statham_punch.csv")
 names(punch) <- make.names(names(punch), unique=TRUE)
 
 ```

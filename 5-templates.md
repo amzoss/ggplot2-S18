@@ -1,193 +1,288 @@
----
-title: "ggplot2 Templates"
-author: "Angela Zoss"
-date: "9/25/2017"
-output: github_document
----
+ggplot2 Templates
+================
+Angela Zoss
+2/1/2018
 
-```{r}
+``` r
 knitr::opts_chunk$set(error = TRUE)
 ```
 
 ## Setup your environment
 
-```{r}
-
+``` r
 # Load required libraries
 
 library(tidyverse)
-
 ```
+
+    ## ── Attaching packages ──────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+
+    ## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
+    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.4
+    ## ✔ tidyr   0.7.2     ✔ stringr 1.2.0
+    ## ✔ readr   1.1.1     ✔ forcats 0.2.0
+
+    ## ── Conflicts ─────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
 
 ## Load your data
 
-```{r}
-
+``` r
 # data comes from https://www.kaggle.com/uciml/adult-census-income
 
 # adding a few settings to correct the data types of a couple of the columns
 
 adult <- read_csv("data/adult.csv", na="?")
-
 ```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   age = col_integer(),
+    ##   workclass = col_character(),
+    ##   fnlwgt = col_integer(),
+    ##   education = col_character(),
+    ##   education.num = col_integer(),
+    ##   marital.status = col_character(),
+    ##   occupation = col_character(),
+    ##   relationship = col_character(),
+    ##   race = col_character(),
+    ##   sex = col_character(),
+    ##   capital.gain = col_integer(),
+    ##   capital.loss = col_integer(),
+    ##   hours.per.week = col_integer(),
+    ##   native.country = col_character(),
+    ##   income = col_character()
+    ## )
 
 ## Try a few charts
 
 ### Bar charts
 
-```{r}
-
+``` r
 # Bar chart, automatically counting number of observations
 
 ggplot(adult) +
   geom_bar(aes(sex))
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
+``` r
 # Bar chart, using another column for the length
 
 ggplot(adult) +
   geom_col(aes(x=sex, y=capital.loss))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+``` r
 # or you can use geom_bar and just change the default statistical function ("stat"), 
 # which is normally "count"
 
 ggplot(adult) +
   geom_bar(aes(sex, capital.loss), stat="identity")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+
+``` r
 # What does it do when you have multiple records for each category?
 
 adult %>% group_by(sex) %>% summarise(total = sum(capital.loss))
-
 ```
 
+    ## # A tibble: 2 x 2
+    ##   sex      total
+    ##   <chr>    <int>
+    ## 1 Female  659052
+    ## 2 Male   2183648
 
-```{r}
-
+``` r
 # Bar chart, using another column for length and specifying the summary function
 
 ggplot(adult) +
   geom_bar(aes(sex, capital.loss), stat="summary", fun.y="mean")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
 # In this case, geom_col doesn't work
 
 ggplot(adult) +
   geom_col(aes(sex, capital.loss), stat="summary", fun.y="mean")
-
 ```
 
-```{r}
+    ## Warning: Ignoring unknown parameters: stat, fun.y
 
+![](5-templates_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+
+``` r
 # You can also summarize numerical variables with a bar chart, but consider using histogram or density instead
 
 ggplot(adult) +
   geom_bar(aes(age))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_histogram(aes(age))
+```
 
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](5-templates_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_histogram(aes(age), binwidth = 1)
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_density(aes(age))
-
 ```
-```{r}
 
+![](5-templates_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+
+``` r
 # Adding another category - do you want to stack or dodge or fill?
 
 # By default, a new category fills the bar (position="stack")
 ggplot(adult) +
   geom_bar(aes(sex, fill=race))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
 # Change position to "dodge" for side-by-side bars
 ggplot(adult) +
   geom_bar(aes(sex, fill=race), position="dodge")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+
+``` r
 # Change position to "fill" for bars scaled up to 100%
 ggplot(adult) +
   geom_bar(aes(sex, fill=race), position="fill")
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
+``` r
 # Pie charts are...  weird.  In ggplot2, you make a pie chart by taking a single stacked bar and changing the coordinate system to coord_polar.
 
 ggplot(adult) +
   geom_bar(aes(x="", fill=sex))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(x="", fill=sex)) +
   coord_polar("y")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+``` r
 # Can get rid of hole in the middle by specifying width = 1
 
 ggplot(adult) +
   geom_bar(aes(x="", fill=sex), width=1) +
   coord_polar("y")
-
-
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ### Scatter plots
 
-```{r}
-
+``` r
 # Scatter plots can show relationships between numerical variables, but be careful of overplotting (dots stacked on top of each other)
 
 ggplot(adult) +
   geom_point(aes(age, capital.loss))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bin2d(aes(age, capital.loss))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+
+``` r
 # Note: if your counts are heavily skewed, you can apply a transformation on the color scale
 
 ggplot(adult) +
   geom_bin2d(aes(age, capital.loss)) +
   scale_fill_continuous(trans="log10")
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
 
 ### Line charts
 
-```{r}
-
+``` r
 # Line charts don't include any inherent summary, so individual data points get mapped and connected with a line
 
 ggplot(adult) + 
   geom_line(aes(x=age, y=capital.loss))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
 ggplot(adult) + 
   geom_line(aes(x=age, y=capital.loss)) +
   geom_point(aes(x=age, y=capital.loss))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+
+``` r
 # You can add your own function to summarize all of the y values at the same x value
 
 ggplot(adult) + 
   geom_line(aes(x=age, y=capital.loss), stat="summary", fun.y=mean)
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
+
+``` r
 # Alternately, you can use geom_smooth to calculate a variety of summary lines
 
 ggplot(adult) + 
   geom_smooth(aes(x=age, y=capital.loss))
+```
 
+    ## `geom_smooth()` using method = 'gam'
+
+![](5-templates_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
+
+``` r
 ggplot(adult) + 
   geom_smooth(aes(x=age, y=capital.loss), method = "lm")
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
 
 ## Design the charts
 
 ### Titles
 
-```{r}
-
+``` r
 # Adding main title and axis labels
 
 ggplot(adult) +
@@ -195,11 +290,11 @@ ggplot(adult) +
   labs(title="This sample has about twice as many men as women.",
        x="Sex",
        y="Number of Respondents")
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
+``` r
 # Changing the legend title is a little harder; 
 # you have to modify the "scale" properties for the non-axis variable
 
@@ -209,8 +304,11 @@ ggplot(adult) +
        x="Sex",
        y="Number of Respondents") +
   scale_fill_discrete(name="Race/Ethnicity")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
+``` r
 # The structure is: "scale_" plus whatever aesthetic property you're modifying (e.g., x, fill, size) 
 # plus either a.) the kind of variable it is (e.g., continuous, discrete) or 
 # b.) a special function that will be applied (e.g., log10, gradient)
@@ -223,14 +321,15 @@ ggplot(adult) +
        x="Sex",
        y="Number of Respondents") +
   scale_fill_continuous(name="Race/Ethnicity")
-
-
 ```
+
+    ## Error: Discrete value supplied to continuous scale
+
+![](5-templates_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
 
 ### Axes
 
-```{r}
-
+``` r
 # ggplot2 does a pretty good job guessing what the axes should look like, but you can modify
 # individual properties manually
 
@@ -240,14 +339,22 @@ ggplot(adult) +
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   scale_x_continuous(breaks=c(20,30,40,50,60,70,80,90))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
 # Gridlines often show up for both major and minor breaks.  To turn off gridlines for minor
 # breaks, an easy way is to set the minor breaks to NULL.
 
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   scale_x_continuous(breaks=c(20,30,40,50,60,70,80,90), minor_breaks = NULL)
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+
+``` r
 # Can also change how the numbers on the axis are spaces out, without doing any mathematical
 # transformations to the data
 
@@ -255,7 +362,13 @@ ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   scale_x_continuous(breaks=c(20,30,40,50,60,70,80,90), minor_breaks = NULL) +
   scale_y_log10()
+```
 
+    ## Warning: Transformation introduced infinite values in continuous y-axis
+
+![](5-templates_files/figure-gfm/unnamed-chunk-13-3.png)<!-- -->
+
+``` r
 # Note: log scale spreads out small values, but you can't plot the value "0" on a log scale,
 # so we can filter those out first, then do some formatting on the breaks and labels
 
@@ -264,13 +377,13 @@ ggplot(adult %>% filter(capital.gain > 0)) +
   scale_x_continuous(breaks=c(20,30,40,50,60,70,80,90), minor_breaks = NULL) +
   scale_y_log10(breaks=c(10,100,1000,10000,100000), 
                 labels=function(x){format(x, scientific = FALSE, big.mark=",")})
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-13-4.png)<!-- -->
 
 ### Coordinate systems
 
-```{r}
-
+``` r
 # Coordinate layers help control the output of the chart
 
 # coord_fixed helps normalize the units across the two axes; 
@@ -280,7 +393,11 @@ ggplot(adult %>% filter(capital.gain > 0)) +
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   coord_fixed(ratio = 1)
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
 # a 1:1 ratio for this chart is terrible; the y-axis goes from 0 to 100,000, while the
 # x-axis goes from 17 to 90. To have the units look similar, each unit on the x-axis
 # should be about 1,000 of the y-axis units.
@@ -288,35 +405,44 @@ ggplot(adult) +
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   coord_fixed(ratio = 1/1000)
-
-# Now the grid on the chart is approximately square
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
+``` r
+# Now the grid on the chart is approximately square
+```
+
+``` r
 # Another useful coord layer is coord_flip.  Some charts require certain variables in
 # certain slots.  For example, geom_bar requires the categorical variable in the x
 # position and the numerical variable in the y position
 
 ggplot(adult) +
   geom_bar(aes(x=sex))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(y=sex))
+```
 
+    ## Error: stat_count() must not be used with a y aesthetic.
 
+``` r
 # To get the categories on the y-axis, you start with the category on the x-axis and then
 # add the coord_flip
 
 ggplot(adult) +
   geom_bar(aes(x=sex)) +
   coord_flip()
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
+``` r
 # Scales can change the spacing of numbers on the axis - essentially, changing the grid
 # against which the numbers are plotted
 
@@ -324,48 +450,63 @@ ggplot(adult %>% filter(capital.gain > 0)) +
   geom_point(aes(age, capital.gain)) +
   scale_y_log10(breaks=c(10,100,1000,10000,100000), 
                 labels=function(x){format(x, scientific = FALSE, big.mark=",")})
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
 # The coord_trans can also change the grid, but it still uses a cartesian approach to the
 # major breaks
 
 ggplot(adult %>% filter(capital.gain > 0)) +
   geom_point(aes(age, capital.gain)) +
   coord_trans(y="log10")
-
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
 ### Axis/legend labels
 
-```{r}
-
+``` r
 # As we've already seen, the labels on a numerical axis can be changed by manually setting
 # the breaks in the axis and/or formatting the labels
 
 ggplot(adult) +
   geom_point(aes(age, capital.gain))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   scale_x_continuous(breaks=c(20,30,40,50,60,70,80,90))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
+
+``` r
 # regardless of the type of axis, you can set the labels to whatever you want
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   scale_x_continuous(breaks=c(20,30,40,50,60,70,80,90),
                      labels=c("A","B","C","D","E","F","G","H"))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-17-3.png)<!-- -->
+
+``` r
 # the same works for a categorical variable, either on an axis or in a legend
 
 ggplot(adult) +
   geom_bar(aes(sex, fill=race)) +
   scale_x_discrete(labels=c("A","B")) +
   scale_fill_discrete(labels=c("A","B","C","D","E"))
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-17-4.png)<!-- -->
 
+``` r
 # The one thing you can't do with scales is change the order of the categories.  For that,
 # you have to turn the variable into a factor and specify the order in the "levels" setting
 # of the factor() function
@@ -376,20 +517,24 @@ adult$race <- factor(adult$race, levels = c("Other","Amer-Indian-Eskimo","Asian-
 
 ggplot(adult) +
   geom_bar(aes(sex, fill=race))
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ### Data labels
 
-```{r}
-
+``` r
 # You can label charts with variables from the dataset or other calculated variables within the chart;
 # just like other chart layers, geom_text layers need x and y positions, and they also require "label"
 
 ggplot(adult) +
   geom_bar(aes(sex)) +
   geom_text(aes(sex, label=sex), stat="count")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+``` r
 # Note: geom_bar has stat="count" embedded within it.  If we don't add that to the geom_text
 # layer, the text layer will try to process each data point individually and will ask
 # for a y value
@@ -401,85 +546,120 @@ ggplot(adult) +
 ggplot(adult) +
   geom_bar(aes(sex)) +
   geom_text(aes(sex, label=..count..), stat="count", nudge_y = 1000)
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
+
+``` r
 # geom_label is like geom_text, but it formats the label differently
 ggplot(adult) +
   geom_bar(aes(sex)) +
   geom_label(aes(sex, label=..count..), stat="count", nudge_y = 1000)
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-19-3.png)<!-- -->
 
 ### Themes
 
-```{r}
-
+``` r
 # Themes control the overall look and feel of the graph.  Several themes are built in to ggplot2.
 
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_gray() +
   ggtitle("Gray")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_classic() +
   ggtitle("Classic")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_bw() +
   ggtitle("Black and white")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-20-3.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_dark() +
   ggtitle("Dark")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-20-4.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_light() +
   ggtitle("Light")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-20-5.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_minimal() +
   ggtitle("Minimal")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-20-6.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_void() +
   ggtitle("Void")
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-20-7.png)<!-- -->
 
+``` r
 # If the preset themes are insufficient, individual properties can be redefined with theme()
 
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme_bw() +
   theme(panel.background = element_rect(fill="pink"))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
 # you can also use themes to remove grid lines without removing tick marks
 
 ggplot(adult) +
   geom_bar(aes(sex)) +
   theme(panel.grid.major.y = element_blank())
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
 
 ### Annotation
 
-```{r}
-
+``` r
 # Earlier, we used geom_text for data labels.  We can also use it for general notes on the graph.
 
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   geom_text(x=25,y=75000,label="A note goes here.")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
+``` r
 # This is suboptimal, though, because a text object that doesn't relate to the data will process
 # slowly.  In this case, the chart is actually drawing a separate text object for every data point
 # in the dataframe.
@@ -490,17 +670,21 @@ ggplot(adult) +
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   annotate("text",x=25,y=75000,label="A note goes here.")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_point(aes(age, capital.gain)) +
   annotate("rect",xmin=12, xmax=95, ymin=25000, ymax=50000, alpha=.2)
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-22-3.png)<!-- -->
 
 ### Colors
 
-```{r}
-
+``` r
 # Most charts use x and y axes to display variables, but you can usually also add another variable to
 # the chart by mapping it to color. 
 
@@ -508,20 +692,32 @@ ggplot(adult) +
 
 ggplot(adult) +
   geom_point(aes(age, capital.gain, fill=race))
-
-ggplot(adult) +
-  geom_point(aes(age, capital.gain, color=race))
-
-ggplot(adult) +
-  geom_bar(aes(sex, fill=race))
-
-ggplot(adult) +
-  geom_bar(aes(sex, color=race))
-
 ```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
-```{r}
+``` r
+ggplot(adult) +
+  geom_point(aes(age, capital.gain, color=race))
+```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+
+``` r
+ggplot(adult) +
+  geom_bar(aes(sex, fill=race))
+```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-23-3.png)<!-- -->
+
+``` r
+ggplot(adult) +
+  geom_bar(aes(sex, color=race))
+```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-23-4.png)<!-- -->
+
+``` r
 # You can change the colors of the chart elements using pre-defined palettes or by manually
 # selecting colors
 
@@ -532,62 +728,90 @@ ggplot(adult) +
 ggplot(adult) +
   geom_bar(aes(sex, fill=race)) +
   scale_fill_grey()
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+``` r
 # The grey palette picks shades of grey between the start and end value, which by default are 0.2 and 0.8.
 # The values can be reversed or made larger or smaller.
 
 ggplot(adult) +
   geom_bar(aes(sex, fill=race)) +
   scale_fill_grey(start=0.8, end=0.2)
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
+
+``` r
 # Other default palettes include palettes from colorbrewer2.org
 
 ggplot(adult) +
   geom_bar(aes(sex, fill=race)) +
   scale_fill_brewer(palette="Dark2")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-24-3.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_bar(aes(sex, fill=race)) +
   scale_fill_brewer(palette="Dark2", direction=-1)
-
 ```
 
-```{r}
+![](5-templates_files/figure-gfm/unnamed-chunk-24-4.png)<!-- -->
 
+``` r
 # Specifying colors manually is as simple as giving a vector of colors to a "manual" scale
 
 ggplot(adult) +
   geom_bar(aes(sex, fill=race)) +
   scale_fill_manual(values=c("cadetblue3","lightpink2","lightskyblue3","lightsalmon2","olivedrab3"))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+``` r
 # R knows names for some colors, but others will need to be specified with codes
 
 ggplot(adult) +
   geom_bar(aes(sex, fill=race)) +
   scale_fill_manual(values=c("#ffffd4","#fed98e","#fe9929","#d95f0e","#993404"))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
+
+``` r
 # For continuous numbers, you can also use scale_color_gradient or scale_fill_gradient
 
 ggplot(adult) +
   geom_point(aes(age, capital.gain, color=age))
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-25-3.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_point(aes(age, capital.gain, color=age)) +
   scale_color_gradient(low="gray80",high="gray20")
+```
 
+![](5-templates_files/figure-gfm/unnamed-chunk-25-4.png)<!-- -->
+
+``` r
 # Color Brewer palettes can be used with continuous numbers, but you use "distiller"
 # instead of "brewer"
 
 ggplot(adult) +
   geom_point(aes(age, capital.gain, color=age)) +
   scale_color_distiller(palette="Greens")
-
 ```
+
+![](5-templates_files/figure-gfm/unnamed-chunk-25-5.png)<!-- -->
 
 ### Facets
 
-```{r}
-
+``` r
 # Facets are some of the most useful layers when you have a large amount of data. Facets create
 # "small multiples", or a series of charts that each has the same specification but that visualizes
 # a different subset of the data.  You can think of it as splitting the data into chunks and then
@@ -600,7 +824,13 @@ ggplot(adult) +
   geom_point(aes(age, hours.per.week)) +
   geom_smooth(aes(age, hours.per.week)) +
   facet_wrap(~education)
+```
 
+    ## `geom_smooth()` using method = 'gam'
+
+![](5-templates_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+``` r
 # facet_grid allows you to split the data by one category in the y direction and another in the x
 # syntax: facet_grid(y~x)
 # Note: you can use a "." to ignore one direction
@@ -609,10 +839,19 @@ ggplot(adult) +
   geom_point(aes(age, hours.per.week)) +
   geom_smooth(aes(age, hours.per.week)) +
   facet_grid(.~race)
+```
 
+    ## `geom_smooth()` using method = 'gam'
+
+![](5-templates_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
+
+``` r
 ggplot(adult) +
   geom_point(aes(age, hours.per.week)) +
   geom_smooth(aes(age, hours.per.week)) +
   facet_grid(sex~race)
-
 ```
+
+    ## `geom_smooth()` using method = 'gam'
+
+![](5-templates_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->

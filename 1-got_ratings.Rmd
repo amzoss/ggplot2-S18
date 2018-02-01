@@ -1,13 +1,9 @@
 ---
 title: "Game of Thromes Character Ratings"
 author: "Angela Zoss"
-date: "9/25/2017"
+date: "2/1/2018"
 output: github_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(error = TRUE)
-```
 
 ## Setup your environment
 
